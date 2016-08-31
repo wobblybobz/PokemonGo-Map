@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 args = get_args()
 flaskDb = FlaskDB()
 
-db_schema_version = 7
+db_schema_version = 8
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -74,7 +74,7 @@ class Pokemon(BaseModel):
     # We are base64 encoding the ids delivered by the api
     # because they are too big for sqlite to handle
     encounter_id = CharField(primary_key=True, max_length=50)
-    spawnpoint_id = CharField(index=True)
+    spawnpoint_id = CharField(index=True, null=True)
     pokemon_id = IntegerField(index=True)
     latitude = DoubleField()
     longitude = DoubleField()
@@ -561,6 +561,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue):
         for f in cell.get('forts', []):
             if config['parse_pokestops'] and f.get('type') == 1:  # Pokestops
                 if 'active_fort_modifier' in f:
+                    lure_info = f.get('lure_info')
                     lure_expiration = datetime.utcfromtimestamp(
                         f['last_modified_timestamp_ms'] / 1000.0) + timedelta(minutes=30)
                     active_fort_modifier = f['active_fort_modifier']
@@ -574,6 +575,19 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue):
                             'lure_expiration': calendar.timegm(lure_expiration.timetuple()),
                             'active_fort_modifier': active_fort_modifier
                         }))
+
+                    if lure_info is not None:
+                        d_t = datetime.utcfromtimestamp(lure_info['lure_expires_timestamp_ms'] / 1000)
+                        pokemons[lure_info['encounter_id']] = {
+                            'encounter_id': b64encode(str(lure_info['encounter_id'])),
+                            'spawnpoint_id': None,
+                            'pokemon_id': lure_info['active_pokemon_id'],
+                            # offset the location the tiniest bit, so that the icon doesn't completely hide the pokestop on the map
+                            'latitude': f['latitude'] + 0.00001,
+                            'longitude': f['longitude'] + 0.00001,
+                            'disappear_time': d_t
+                        }
+
                 else:
                     lure_expiration, active_fort_modifier = None, None
 
@@ -939,4 +953,9 @@ def database_migrate(db, old_ver):
         migrate(
             migrator.drop_column('gymdetails', 'description'),
             migrator.add_column('gymdetails', 'description', TextField(null=True, default=""))
+        )
+
+    if old_ver < 8:
+        migrate(
+            migrator.drop_not_null('pokemon', 'spawnpoint_id'),
         )
