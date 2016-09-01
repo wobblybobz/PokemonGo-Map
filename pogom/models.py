@@ -75,6 +75,7 @@ class Pokemon(BaseModel):
     # because they are too big for sqlite to handle
     encounter_id = CharField(primary_key=True, max_length=50)
     spawnpoint_id = CharField(index=True, null=True)
+    pokestop_id = CharField(null=True)
     pokemon_id = IntegerField(index=True)
     latitude = DoubleField()
     longitude = DoubleField()
@@ -545,6 +546,9 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue):
                 pokemons[p['encounter_id']] = {
                     'encounter_id': b64encode(str(p['encounter_id'])),
                     'spawnpoint_id': p['spawn_point_id'],
+                    # Lured and non-lured pokemon both go into the `pokemons` collection
+                    # to be upserted, so we need to keep their columns the same
+                    'pokestop_id': None,
                     'pokemon_id': p['pokemon_data']['pokemon_id'],
                     'latitude': p['latitude'],
                     'longitude': p['longitude'],
@@ -585,9 +589,11 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue):
                         d_t = datetime.utcfromtimestamp(lure_info['lure_expires_timestamp_ms'] / 1000)
                         pokemons[lure_info['encounter_id']] = {
                             'encounter_id': b64encode(str(lure_info['encounter_id'])),
+                            # Lured and non-lured pokemon both go into the `pokemons` collection
+                            # to be upserted, so we need to keep their columns the same
                             'spawnpoint_id': None,
+                            'pokestop_id': b64encode(str(f['id'])),
                             'pokemon_id': lure_info['active_pokemon_id'],
-                            # offset the location the tiniest bit, so that the icon doesn't completely hide the pokestop on the map
                             'latitude': f['latitude'],
                             'longitude': f['longitude'],
                             'disappear_time': d_t
@@ -963,4 +969,5 @@ def database_migrate(db, old_ver):
     if old_ver < 8:
         migrate(
             migrator.drop_not_null('pokemon', 'spawnpoint_id'),
+            migrator.add_column('pokemon', 'pokestop_id', CharField(null=True))
         )
