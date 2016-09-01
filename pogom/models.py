@@ -583,8 +583,8 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue):
                             'spawnpoint_id': None,
                             'pokemon_id': lure_info['active_pokemon_id'],
                             # offset the location the tiniest bit, so that the icon doesn't completely hide the pokestop on the map
-                            'latitude': f['latitude'] + 0.00001,
-                            'longitude': f['longitude'] + 0.00001,
+                            'latitude': f['latitude'],
+                            'longitude': f['longitude'],
                             'disappear_time': d_t
                         }
 

@@ -1285,8 +1285,8 @@ function setupPokemonMarker (item, skipNotification, isBounceDisabled) {
 
   var marker = new google.maps.Marker({
     position: {
-      lat: item['latitude'],
-      lng: item['longitude']
+      lat: (item['spawnpoint_id'] !== null) ? item['latitude'] : (item['latitude'] + 0.0001),
+      lng: (item['spawnpoint_id'] !== null) ? item['longitude'] : (item['longitude'] + 0.0001)
     },
     zIndex: 9999,
     map: map,
