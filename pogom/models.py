@@ -576,7 +576,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue):
                             'active_fort_modifier': active_fort_modifier
                         }))
 
-                    if lure_info is not None:
+                    if lure_info is not None and config['parse_pokemon']:
                         d_t = datetime.utcfromtimestamp(lure_info['lure_expires_timestamp_ms'] / 1000)
                         pokemons[lure_info['encounter_id']] = {
                             'encounter_id': b64encode(str(lure_info['encounter_id'])),
