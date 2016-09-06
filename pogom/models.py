@@ -269,17 +269,16 @@ class Pokemon(BaseModel):
 
         n, e, s, w = hex_bounds(center, steps)
 
-        query = (Pokemon
-                 .select(Pokemon.latitude.alias('lat'),
-                         Pokemon.longitude.alias('lng'),
-                         ((Pokemon.disappear_time.minute * 60) + Pokemon.disappear_time.second).alias('time'),
-                         Pokemon.spawnpoint_id
-                         ))
-        query = (query.where((Pokemon.latitude <= n) &
-                             (Pokemon.latitude >= s) &
-                             (Pokemon.longitude >= w) &
-                             (Pokemon.longitude <= e)
-                             ))
+        query = (Pokemon.select(Pokemon.latitude.alias('lat'),
+                                Pokemon.longitude.alias('lng'),
+                                ((Pokemon.disappear_time.minute * 60) + Pokemon.disappear_time.second).alias('time'),
+                                Pokemon.spawnpoint_id)
+                        .where((Pokemon.latitude <= n) &
+                               (Pokemon.latitude >= s) &
+                               (Pokemon.longitude >= w) &
+                               (Pokemon.longitude <= e) &
+                               (Pokemon.spawnpoint_id.is_null(False))))
+
         # Sqlite doesn't support distinct on columns
         if args.db_type == 'mysql':
             query = query.distinct(Pokemon.spawnpoint_id)
