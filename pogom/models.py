@@ -202,7 +202,7 @@ class Pokemon(BaseModel):
         :param pokemon_id: id of pokemon that we need appearances for
         :param last_appearance: time of last appearance of pokemon after which we are getting appearances
         :param timediff: limiting period of the selection
-        :return: list of  pokemon  appearances over a selected period
+        :return: list of pokemon appearances over a selected period (excluding lured appearances)
         '''
         if timediff:
             timediff = datetime.utcnow() - timediff
@@ -210,7 +210,8 @@ class Pokemon(BaseModel):
                  .select()
                  .where((Pokemon.pokemon_id == pokemon_id) &
                         (Pokemon.disappear_time > datetime.utcfromtimestamp(last_appearance / 1000.0)) &
-                        (Pokemon.disappear_time > timediff)
+                        (Pokemon.disappear_time > timediff) &
+                        (Pokemon.spawnpoint_id.is_null(False))
                         )
                  .order_by(Pokemon.disappear_time.asc())
                  .dicts()
