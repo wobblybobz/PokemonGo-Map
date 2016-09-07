@@ -17,7 +17,6 @@ from threading import Thread, Event
 from queue import Queue
 from flask_cors import CORS
 from flask_cache_bust import init_cache_busting
-from gevent import pywsgi
 
 from pogom import config
 from pogom.app import Pogom
@@ -26,6 +25,8 @@ from pogom.utils import get_args, get_encryption_lib_path
 from pogom.search import search_overseer_thread
 from pogom.models import init_database, create_tables, drop_tables, Pokemon, db_updater, clean_db_loop
 from pogom.webhook import wh_updater
+
+from pogom.proxy import check_proxies
 
 # Currently supported pgoapi
 pgoapi_version = "1.1.7"
@@ -196,6 +197,13 @@ def main():
         t.start()
 
     if not args.only_server:
+
+        # Check all proxies before continue so we know they are good
+        if args.proxy:
+
+            # Overwrite old args.proxy with new working list
+            args.proxy = check_proxies(args)
+
         # Gather the pokemons!
 
         # check the sort of scan
@@ -232,31 +240,20 @@ def main():
     config['GMAPS_KEY'] = args.gmaps_key
 
     if args.no_server:
-        # This loop allows for ctrl-c interupts to work since gevent won't be holding the program open
+        # This loop allows for ctrl-c interupts to work since flask won't be holding the program open
         while search_thread.is_alive():
             time.sleep(60)
     else:
-        # run gevent server
-        gevent_log = None
-        if args.verbose or args.very_verbose:
-            gevent_log = log
+        ssl_context = None
         if args.ssl_certificate and args.ssl_privatekey \
                 and os.path.exists(args.ssl_certificate) and os.path.exists(args.ssl_privatekey):
-                http_server = pywsgi.WSGIServer((args.host, args.port), app,
-                                                log=gevent_log,
-                                                error_log=log,
-                                                keyfile=args.ssl_privatekey,
-                                                certfile=args.ssl_certificate,
-                                                ssl_version=ssl.PROTOCOL_TLSv1_2)
-                log.info('Web server in SSL mode, listening at https://%s:%d', args.host, args.port)
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+            ssl_context.load_cert_chain(args.ssl_certificate, args.ssl_privatekey)
+            log.info('Web server in SSL mode.')
+        if args.verbose or args.very_verbose:
+            app.run(threaded=True, use_reloader=False, debug=True, host=args.host, port=args.port, ssl_context=ssl_context)
         else:
-            http_server = pywsgi.WSGIServer((args.host, args.port), app, log=gevent_log, error_log=log)
-            log.info('Web server listening at http://%s:%d', args.host, args.port)
-        # run it
-        try:
-            http_server.serve_forever()
-        except KeyboardInterrupt:
-            pass
+            app.run(threaded=True, use_reloader=False, debug=False, host=args.host, port=args.port, ssl_context=ssl_context)
 
 if __name__ == '__main__':
     main()
