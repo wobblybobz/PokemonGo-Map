@@ -656,6 +656,16 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue):
                             'disappear_time': d_t
                         }
 
+                        if args.webhooks:
+                            wh_update_queue.put(('lured_pokemon', {
+                                'encounter_id': b64encode(str(lure_info['encounter_id'])),
+                                'pokestop_id': b64encode(str(f['id'])),
+                                'pokemon_id': lure_info['active_pokemon_id'],
+                                'latitude': f['latitude'],
+                                'longitude': f['longitude'],
+                                'disappear_time': calendar.timegm(d_t.timetuple()),
+                            }))
+
                 else:
                     lure_expiration, active_fort_modifier = None, None
 
