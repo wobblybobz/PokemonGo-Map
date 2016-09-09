@@ -283,7 +283,7 @@ def get_args():
         if len(args.accounts) == 0:
             print(sys.argv[0] + ": Error: no accounts specified. Use -a, -u, and -p or --accountcsv to add accounts")
             sys.exit(1)
-        
+
         args.encounter_blacklist = [int(i) for i in args.encounter_blacklist]
     return args
 

@@ -1114,7 +1114,7 @@ function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitu
   })
   var details = ''
   if ('individual_attack' in pokemon && pokemon['individual_attack'] != null) {
-	var iv = (pokemon['individual_attack'] +  pokemon['individual_defense'] +  pokemon['individual_stamina']) / 45 * 100
+    var iv = (pokemon['individual_attack'] + pokemon['individual_defense'] + pokemon['individual_stamina']) / 45 * 100
     details = `
       <div>
         IV: ${iv.toFixed(1)}% (${pokemon['individual_attack']}/${pokemon['individual_defense']}/${pokemon['individual_stamina']})
@@ -2221,7 +2221,7 @@ $(function () {
   if (Store.get('startAtUserLocation')) {
     centerMapOnLocation()
   }
-  
+
   $.getJSON('static/dist/data/moves.min.json').done(function (data) {
     moves = data
   })

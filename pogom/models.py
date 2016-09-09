@@ -16,7 +16,7 @@ from playhouse.shortcuts import RetryOperationalError
 from playhouse.migrate import migrate, MySQLMigrator, SqliteMigrator
 from datetime import datetime, timedelta
 from base64 import b64encode
-from time import sleep
+
 
 from . import config
 from .utils import get_pokemon_name, get_pokemon_rarity, get_pokemon_types, get_args
@@ -89,7 +89,7 @@ class Pokemon(BaseModel):
 
     class Meta:
         indexes = ((('latitude', 'longitude'), False),)
-    
+
     @staticmethod
     def get_encountered_pokemon(encounter_id):
         query = (Pokemon
@@ -589,6 +589,7 @@ def hex_bounds(center, steps):
     w = get_new_coords(center, sp_dist, 270)[1]
     return (n, e, s, w)
 
+
 def construct_pokemon_dict(pokemons, p, encounter_result, d_t):
     pokemons[p['encounter_id']] = {
         'encounter_id': b64encode(str(p['encounter_id'])),
@@ -632,10 +633,10 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
         if config['parse_pokemon']:
             for p in cell.get('wild_pokemons', []):
 
-                #Don't parse pokemon we've already encountered. Avoids IVs getting nulled out on rescanning.
+                # Don't parse pokemon we've already encountered. Avoids IVs getting nulled out on rescanning.
                 if Pokemon.get_encountered_pokemon(p['encounter_id']):
                     continue
-                    
+    
                 # time_till_hidden_ms was overflowing causing a negative integer.
                 # It was also returning a value above 3.6M ms.
                 if 0 < p['time_till_hidden_ms'] < 3600000:
@@ -648,17 +649,17 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
 
                 printPokemon(p['pokemon_data']['pokemon_id'], p['latitude'],
                              p['longitude'], d_t)
-                
-                #Scan for IVs and moves
+
+                # Scan for IVs and moves
                 encounter_result = None
                 if args.encounter and not p['pokemon_data']['pokemon_id'] in args.encounter_blacklist:
                     time.sleep(args.encounter_delay)
                     encounter_result = api.encounter(encounter_id=p['encounter_id'],
-                                           spawn_point_id=p['spawn_point_id'],
-                                           player_latitude=step_location[0],
-                                           player_longitude=step_location[1])
+                                                     spawn_point_id=p['spawn_point_id'],
+                                                     player_latitude=step_location[0],
+                                                     player_longitude=step_location[1])
                 construct_pokemon_dict(pokemons, p, encounter_result, d_t)
-                        
+       
                 if args.webhooks:
                     wh_update_queue.put(('pokemon', {
                         'encounter_id': b64encode(str(p['encounter_id'])),
@@ -669,11 +670,11 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                         'disappear_time': calendar.timegm(d_t.timetuple()),
                         'last_modified_time': p['last_modified_timestamp_ms'],
                         'time_until_hidden_ms': p['time_till_hidden_ms'],
-                        'individual_attack' : pokemons[p['encounter_id']]['individual_attack'],
-                        'individual_defense' : pokemons[p['encounter_id']]['individual_defense'],
-                        'individual_stamina' :  pokemons[p['encounter_id']]['individual_stamina'],
-                        'move_1' :  pokemons[p['encounter_id']]['move_1'],
-                        'move_2' : pokemons[p['encounter_id']]['move_2']
+                        'individual_attack': pokemons[p['encounter_id']]['individual_attack'],
+                        'individual_defense': pokemons[p['encounter_id']]['individual_defense'],
+                        'individual_stamina':  pokemons[p['encounter_id']]['individual_stamina'],
+                        'move_1':  pokemons[p['encounter_id']]['move_1'],
+                        'move_2': pokemons[p['encounter_id']]['move_2']
                     }))
 
         for f in cell.get('forts', []):
@@ -1072,9 +1073,9 @@ def database_migrate(db, old_ver):
 
     if old_ver < 8:
         migrate(
-            migrator.add_column('pokemon', 'individual_attack', IntegerField(null=True,default=0)),
-            migrator.add_column('pokemon', 'individual_defense', IntegerField(null=True,default=0)),
-            migrator.add_column('pokemon', 'individual_stamina', IntegerField(null=True,default=0)),
-            migrator.add_column('pokemon', 'move_1', IntegerField(null=True,default=0)),
-            migrator.add_column('pokemon', 'move_2', IntegerField(null=True,default=0))
+            migrator.add_column('pokemon', 'individual_attack', IntegerField(null=True, default=0)),
+            migrator.add_column('pokemon', 'individual_defense', IntegerField(null=True, default=0)),
+            migrator.add_column('pokemon', 'individual_stamina', IntegerField(null=True, default=0)),
+            migrator.add_column('pokemon', 'move_1', IntegerField(null=True, default=0)),
+            migrator.add_column('pokemon', 'move_2', IntegerField(null=True, default=0))
         )
