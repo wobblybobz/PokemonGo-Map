@@ -1111,7 +1111,7 @@ function openMapDirections (lat, lng) { // eslint-disable-line no-unused-vars
   window.open(url, '_blank')
 }
 
-function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitude, encounterId, atk, def, sta, move_1, move_2) {
+function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitude, encounterId, atk, def, sta, move1, move2) {
   var disappearDate = new Date(disappearTime)
   var rarityDisplay = rarity ? '(' + rarity + ')' : ''
   var typesDisplay = ''
@@ -1126,7 +1126,7 @@ function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitu
         IV: ${iv.toFixed(1)}% (${atk}/${def}/${sta})
       </div>
       <div>
-        Moves: ${moves[move_1]} / ${moves[move_2]}
+        Moves: ${moves[move1]} / ${moves[move2]}
       </div>
       `
   }
@@ -1399,7 +1399,7 @@ function setupPokemonMarker (item, skipNotification, isBounceDisabled) {
   }
 
   marker.infoWindow = new google.maps.InfoWindow({
-    content: pokemonLabel(item['pokemon_name'], item['pokemon_rarity'], item['pokemon_types'], item['disappear_time'], item['pokemon_id'], item['latitude'], item['longitude'], item['encounter_id'], item['individual_attack'], item['individual_defense'], item['individual_stamina'], item['move_1'],item['move_2']),
+    content: pokemonLabel(item['pokemon_name'], item['pokemon_rarity'], item['pokemon_types'], item['disappear_time'], item['pokemon_id'], item['latitude'], item['longitude'], item['encounter_id'], item['individual_attack'], item['individual_defense'], item['individual_stamina'], item['move_1'], item['move_2']),
     disableAutoPan: true
   })
 
@@ -2309,7 +2309,7 @@ $(function () {
       notifiedRarity = $selectRarityNotify.val().map(String)
       Store.set('remember_select_rarity_notify', notifiedRarity)
     })
-	$textPerfectionNotify.on('change', function (e) {
+    $textPerfectionNotify.on('change', function (e) {
       notifiedMinPerfection = parseInt($textPerfectionNotify.val(), 10)
       if (isNaN(notifiedMinPerfection) || notifiedMinPerfection <= 0) {
         notifiedMinPerfection = ''
@@ -2325,7 +2325,7 @@ $(function () {
     $selectExclude.val(Store.get('remember_select_exclude')).trigger('change')
     $selectPokemonNotify.val(Store.get('remember_select_notify')).trigger('change')
     $selectRarityNotify.val(Store.get('remember_select_rarity_notify')).trigger('change')
-	$textPerfectionNotify.val(Store.get('remember_text_perfection_notify')).trigger('change')
+    $textPerfectionNotify.val(Store.get('remember_text_perfection_notify')).trigger('change')
 
     if (isTouchDevice()) {
       $('.select2-search input').prop('readonly', true)
