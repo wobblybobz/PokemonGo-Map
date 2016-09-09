@@ -661,7 +661,7 @@ def search_worker_thread(args, account_queue, account_failures, search_items_que
 
                 # Got the response, parse it out, send todo's to db/wh queues
                 try:
-                    parsed = parse_map(args, response_dict, step_location, dbq, whq)
+                    parsed = parse_map(args, response_dict, step_location, dbq, whq, api)
                     search_items_queue.task_done()
                     status[('success' if parsed['count'] > 0 else 'noitems')] += 1
                     consecutive_fails = 0
@@ -730,12 +730,12 @@ def search_worker_thread(args, account_queue, account_failures, search_items_que
                 time.sleep(args.scan_delay)
 
         # catch any process exceptions, log them, and continue the thread
+
         except Exception as e:
             status['message'] = 'Exception in search_worker using account {}. Restarting with fresh account. See logs for details.'.format(account['username'])
             time.sleep(args.scan_delay)
             log.error('Exception in search_worker under account {} Exception message: {}'.format(account['username'], e))
             account_failures.append({'account': account, 'last_fail_time': now(), 'reason': 'exception'})
-
 
 def check_login(args, account, api, position, proxy_url):
 
