@@ -1111,7 +1111,7 @@ function openMapDirections (lat, lng) { // eslint-disable-line no-unused-vars
   window.open(url, '_blank')
 }
 
-function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitude, encounterId, atk, def, sta, move1, move2) {
+function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitude, encounterId, atk, def, sta, move1, move2, isLured) {
   var disappearDate = new Date(disappearTime)
   var rarityDisplay = rarity ? '(' + rarity + ')' : ''
   var typesDisplay = ''
@@ -1131,6 +1131,7 @@ function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitu
       `
   }
   var contentstring = `
+    ${isLured ? '<div><b>Lured Pokemon</b></div>' : ''}
     <div>
       <b>${name}</b>
       <span> - </span>
@@ -1373,6 +1374,9 @@ function setupPokemonMarker (item, skipNotification, isBounceDisabled) {
   var sprite = pokemonSprites[Store.get('pokemonIcons')] || pokemonSprites['highres']
   var icon = getGoogleSprite(pokemonIndex, sprite, iconSize)
 
+  // if a pokestop_id is present, then this pokemon is lured
+  var isLured = item['pokestop_id'] !== null
+
   var animationDisabled = false
   if (isBounceDisabled === true) {
     animationDisabled = true
@@ -1380,8 +1384,9 @@ function setupPokemonMarker (item, skipNotification, isBounceDisabled) {
 
   var marker = new google.maps.Marker({
     position: {
-      lat: item['latitude'],
-      lng: item['longitude']
+      // if the pokemon is lured, offset its location a tiny bit since otherwise it completely covers the pokestop
+      lat: (!isLured) ? item['latitude'] : (item['latitude'] + 0.0001),
+      lng: (!isLured) ? item['longitude'] : (item['longitude'] + 0.0001)
     },
     zIndex: 9999,
     map: map,
@@ -1399,7 +1404,7 @@ function setupPokemonMarker (item, skipNotification, isBounceDisabled) {
   }
 
   marker.infoWindow = new google.maps.InfoWindow({
-    content: pokemonLabel(item['pokemon_name'], item['pokemon_rarity'], item['pokemon_types'], item['disappear_time'], item['pokemon_id'], item['latitude'], item['longitude'], item['encounter_id'], item['individual_attack'], item['individual_defense'], item['individual_stamina'], item['move_1'], item['move_2']),
+    content: pokemonLabel(item['pokemon_name'], item['pokemon_rarity'], item['pokemon_types'], item['disappear_time'], item['pokemon_id'], item['latitude'], item['longitude'], item['encounter_id'], item['individual_attack'], item['individual_defense'], item['individual_stamina'], item['move_1'], item['move_2'], isLured),
     disableAutoPan: true
   })
 
@@ -1408,7 +1413,7 @@ function setupPokemonMarker (item, skipNotification, isBounceDisabled) {
       if (Store.get('playSound')) {
         audio.play()
       }
-      sendNotification('A wild ' + item['pokemon_name'] + ' appeared!', 'Click to load map', 'static/icons/' + item['pokemon_id'] + '.png', item['latitude'], item['longitude'])
+      sendNotification(`A ${isLured ? 'lured' : 'wild'} ${item['pokemon_name']} appeared!`, 'Click to load map', 'static/icons/' + item['pokemon_id'] + '.png', item['latitude'], item['longitude'])
     }
     if (marker.animationDisabled !== true) {
       marker.setAnimation(google.maps.Animation.BOUNCE)
