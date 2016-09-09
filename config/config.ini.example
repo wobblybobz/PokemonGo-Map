@@ -26,7 +26,6 @@
 #encounter-delay        # delay before starting an encounter
 #encounter-blacklist:   # don't encounter these pokemon. example:[13,16,19,21]
 
-
 # Misc
 #gmaps-key:             # your Google Maps API key
 #proxy:                 # Proxy URL e.g. socks5://127.0.0.1:9050 or a list of proxies e.g. [socks5://127.0.0.1:9050,socks5://127.0.0.1:9050]

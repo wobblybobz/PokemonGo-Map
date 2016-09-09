@@ -631,7 +631,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
     for cell in cells:
         if config['parse_pokemon']:
             for p in cell.get('wild_pokemons', []):
-                
+
                 #Don't parse pokemon we've already encountered. Avoids IVs getting nulled out on rescanning.
                 if Pokemon.get_encountered_pokemon(p['encounter_id']):
                     continue
