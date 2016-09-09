@@ -5,6 +5,7 @@
 var $selectExclude
 var $selectPokemonNotify
 var $selectRarityNotify
+var $textPerfectionNotify
 var $selectStyle
 var $selectIconResolution
 var $selectIconSize
@@ -23,6 +24,7 @@ var searchMarkerStyles
 var excludedPokemon = []
 var notifiedPokemon = []
 var notifiedRarity = []
+var notifiedMinPerfection = null
 
 var map
 var rawDataIsLoading = false
@@ -734,6 +736,10 @@ var StoreOptions = {
     default: [],
     type: StoreTypes.JSON
   },
+  'remember_text_perfection_notify': {
+    default: '',
+    type: StoreTypes.Number
+  },
   'showGyms': {
     default: false,
     type: StoreTypes.Boolean
@@ -1406,6 +1412,21 @@ function setupPokemonMarker (item, skipNotification, isBounceDisabled) {
     }
     if (marker.animationDisabled !== true) {
       marker.setAnimation(google.maps.Animation.BOUNCE)
+    }
+  }
+
+  if (item['individual_attack'] != null) {
+    var perfection = 100.0 * (item['individual_attack'] + item['individual_defense'] + item['individual_stamina']) / 45
+    if (notifiedMinPerfection > 0 && perfection >= notifiedMinPerfection) {
+      if (!skipNotification) {
+        if (Store.get('playSound')) {
+          audio.play()
+        }
+        sendNotification('A ' + perfection.toFixed(1) + '% perfect ' + item['pokemon_name'] + ' appeared!', 'Click to load map', 'static/icons/' + item['pokemon_id'] + '.png', item['latitude'], item['longitude'])
+      }
+      if (marker.animationDisabled !== true) {
+        marker.setAnimation(google.maps.Animation.BOUNCE)
+      }
     }
   }
 
@@ -2229,6 +2250,7 @@ $(function () {
   $selectExclude = $('#exclude-pokemon')
   $selectPokemonNotify = $('#notify-pokemon')
   $selectRarityNotify = $('#notify-rarity')
+  $textPerfectionNotify = $('#notify-perfection')
   var numberOfPokemon = 151
 
   // Load pokemon names and populate lists
@@ -2287,11 +2309,23 @@ $(function () {
       notifiedRarity = $selectRarityNotify.val().map(String)
       Store.set('remember_select_rarity_notify', notifiedRarity)
     })
+	$textPerfectionNotify.on('change', function (e) {
+      notifiedMinPerfection = parseInt($textPerfectionNotify.val(), 10)
+      if (isNaN(notifiedMinPerfection) || notifiedMinPerfection <= 0) {
+        notifiedMinPerfection = ''
+      }
+      if (notifiedMinPerfection > 100) {
+        notifiedMinPerfection = 100
+      }
+      $textPerfectionNotify.val(notifiedMinPerfection)
+      Store.set('remember_text_perfection_notify', notifiedMinPerfection)
+    })
 
     // recall saved lists
     $selectExclude.val(Store.get('remember_select_exclude')).trigger('change')
     $selectPokemonNotify.val(Store.get('remember_select_notify')).trigger('change')
     $selectRarityNotify.val(Store.get('remember_select_rarity_notify')).trigger('change')
+	$textPerfectionNotify.val(Store.get('remember_text_perfection_notify')).trigger('change')
 
     if (isTouchDevice()) {
       $('.select2-search input').prop('readonly', true)
