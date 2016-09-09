@@ -636,7 +636,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                 # Don't parse pokemon we've already encountered. Avoids IVs getting nulled out on rescanning.
                 if Pokemon.get_encountered_pokemon(p['encounter_id']):
                     continue
-    
+
                 # time_till_hidden_ms was overflowing causing a negative integer.
                 # It was also returning a value above 3.6M ms.
                 if 0 < p['time_till_hidden_ms'] < 3600000:
@@ -659,7 +659,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                                                      player_latitude=step_location[0],
                                                      player_longitude=step_location[1])
                 construct_pokemon_dict(pokemons, p, encounter_result, d_t)
-       
+
                 if args.webhooks:
                     wh_update_queue.put(('pokemon', {
                         'encounter_id': b64encode(str(p['encounter_id'])),
@@ -672,8 +672,8 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                         'time_until_hidden_ms': p['time_till_hidden_ms'],
                         'individual_attack': pokemons[p['encounter_id']]['individual_attack'],
                         'individual_defense': pokemons[p['encounter_id']]['individual_defense'],
-                        'individual_stamina':  pokemons[p['encounter_id']]['individual_stamina'],
-                        'move_1':  pokemons[p['encounter_id']]['move_1'],
+                        'individual_stamina': pokemons[p['encounter_id']]['individual_stamina'],
+                        'move_1': pokemons[p['encounter_id']]['move_1'],
                         'move_2': pokemons[p['encounter_id']]['move_2']
                     }))
 
