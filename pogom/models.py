@@ -706,6 +706,8 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                         }))
 
                     if lure_info is not None and config['parse_pokemon']:
+                        if Pokemon.get_encountered_pokemon(lure_info['encounter_id']):
+                            continue
                         d_t = datetime.utcfromtimestamp(lure_info['lure_expires_timestamp_ms'] / 1000)
                         pokemons[lure_info['encounter_id']] = {
                             'encounter_id': b64encode(str(lure_info['encounter_id'])),
@@ -716,9 +718,40 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                             'pokemon_id': lure_info['active_pokemon_id'],
                             'latitude': f['latitude'],
                             'longitude': f['longitude'],
-                            'disappear_time': d_t
+                            'disappear_time': d_t,
+                            'individual_attack': None,
+                            'individual_defense': None,
+                            'individual_stamina': None,
+                            'move_1': None,
+                            'move_2': None,
                         }
-
+                        encounter_result = None
+                        attack = None
+                        defense = None
+                        stamina = None
+                        move_1 = None
+                        move_2 = None
+                        if args.encounter and not lure_info['active_pokemon_id'] in args.encounter_blacklist:
+                            time.sleep(args.encounter_delay)
+                            encounter_result = api.disk_encounter(encounter_id=lure_info['encounter_id'],
+                                                     fort_id=f['id'],
+                                                     player_latitude=step_location[0],
+                                                     player_longitude=step_location[1])
+                        if encounter_result is not None:
+                            pokemon_info = encounter_result['responses']['DISK_ENCOUNTER']['pokemon_data']
+                            attack = pokemon_info.get('individual_attack', 0)
+                            defense = pokemon_info.get('individual_defense', 0)
+                            stamina = pokemon_info.get('individual_stamina', 0)
+                            move_1 =  pokemon_info['move_1']
+                            move_2 =  pokemon_info['move_2']
+                            pokemons[lure_info['encounter_id']].update({
+                                'individual_attack': attack,
+                                'individual_defense': defense,
+                                'individual_stamina': stamina,
+                                'move_1': pokemon_info['move_1'],
+                                'move_2': pokemon_info['move_2'],
+                            })
+                        
                         if args.webhooks:
                             wh_update_queue.put(('lured_pokemon', {
                                 'encounter_id': b64encode(str(lure_info['encounter_id'])),
@@ -727,6 +760,11 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                                 'latitude': f['latitude'],
                                 'longitude': f['longitude'],
                                 'disappear_time': calendar.timegm(d_t.timetuple()),
+                                'individual_attack':attack,
+                                'individual_defense':defense,
+                                'individual_stamina':stamina,
+                                'move_1': move_1,
+                                'move_2': move_2,
                             }))
 
                 else:
@@ -1114,8 +1152,6 @@ def database_migrate(db, old_ver):
             migrator.add_column('pokemon', 'individual_stamina', IntegerField(null=True, default=0)),
             migrator.add_column('pokemon', 'move_1', IntegerField(null=True, default=0)),
             migrator.add_column('pokemon', 'move_2', IntegerField(null=True, default=0))
-            migrator.drop_not_null('pokemon', 'spawnpoint_id'),
-            migrator.add_column('pokemon', 'pokestop_id', CharField(null=True))
         )
     if old_ver < 9:
         migrate(
