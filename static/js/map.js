@@ -1105,7 +1105,7 @@ function openMapDirections (lat, lng) { // eslint-disable-line no-unused-vars
   window.open(url, '_blank')
 }
 
-function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitude, encounterId, pokemon) {
+function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitude, encounterId, atk, def, sta, move_1, move_2) {
   var disappearDate = new Date(disappearTime)
   var rarityDisplay = rarity ? '(' + rarity + ')' : ''
   var typesDisplay = ''
@@ -1113,14 +1113,14 @@ function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitu
     typesDisplay += getTypeSpan(type)
   })
   var details = ''
-  if ('individual_attack' in pokemon && pokemon['individual_attack'] != null) {
-    var iv = (pokemon['individual_attack'] + pokemon['individual_defense'] + pokemon['individual_stamina']) / 45 * 100
+  if (atk != null) {
+    var iv = (atk + def + sta) / 45 * 100
     details = `
       <div>
-        IV: ${iv.toFixed(1)}% (${pokemon['individual_attack']}/${pokemon['individual_defense']}/${pokemon['individual_stamina']})
+        IV: ${iv.toFixed(1)}% (${atk}/${def}/${sta})
       </div>
       <div>
-        Moves: ${moves[pokemon['move_1']]} / ${moves[pokemon['move_2']]}
+        Moves: ${moves[move_1]} / ${moves[move_2]}
       </div>
       `
   }
@@ -1393,7 +1393,7 @@ function setupPokemonMarker (item, skipNotification, isBounceDisabled) {
   }
 
   marker.infoWindow = new google.maps.InfoWindow({
-    content: pokemonLabel(item['pokemon_name'], item['pokemon_rarity'], item['pokemon_types'], item['disappear_time'], item['pokemon_id'], item['latitude'], item['longitude'], item['encounter_id'], item),
+    content: pokemonLabel(item['pokemon_name'], item['pokemon_rarity'], item['pokemon_types'], item['disappear_time'], item['pokemon_id'], item['latitude'], item['longitude'], item['encounter_id'], item['individual_attack'], item['individual_defense'], item['individual_stamina'], item['move_1'],item['move_2']),
     disableAutoPan: true
   })
 
