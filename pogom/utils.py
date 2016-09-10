@@ -285,7 +285,7 @@ def get_args():
             sys.exit(1)
 
         args.encounter_blacklist = [int(i) for i in args.encounter_blacklist]
-        
+
         # Decide which scanning mode to use
         if args.spawnpoint_scanning:
             args.scheduler = 'SpawnScan'
