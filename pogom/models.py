@@ -94,7 +94,8 @@ class Pokemon(BaseModel):
     def get_encountered_pokemon(encounter_id):
         query = (Pokemon
                  .select()
-                 .where(Pokemon.encounter_id == b64encode(str(encounter_id)))
+                 .where(Pokemon.encounter_id == b64encode(str(encounter_id)) &
+                        Pokemon.disappear_time > datetime.utcnow())
                  .dicts()
                  )
         pokemon = []
