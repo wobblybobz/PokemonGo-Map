@@ -285,12 +285,26 @@ def get_args():
             sys.exit(1)
 
         args.encounter_blacklist = [int(i) for i in args.encounter_blacklist]
+
+        # Decide which scanning mode to use
+        if args.spawnpoint_scanning:
+            args.scheduler = 'SpawnScan'
+        elif args.spawnpoints_only:
+            args.scheduler = 'HexSearchSpawnpoint'
+        else:
+            args.scheduler = 'HexSearch'
+
     return args
 
 
 def now():
     # The fact that you need this helper...
     return int(time.time())
+
+
+# gets the current time past the hour
+def cur_sec():
+    return (60 * time.gmtime().tm_min) + time.gmtime().tm_sec
 
 
 def i8ln(word):
