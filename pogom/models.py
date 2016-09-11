@@ -19,7 +19,6 @@ from base64 import b64encode
 from cachetools import TTLCache
 from cachetools import cached
 
-
 from . import config
 from .utils import get_pokemon_name, get_pokemon_rarity, get_pokemon_types, get_args
 from .transform import transform_from_wgs_to_gcj, get_new_coords
