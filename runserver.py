@@ -185,9 +185,7 @@ def main():
     if args.no_gyms:
         log.info('Parsing of Gyms disabled')
     if args.encounter:
-        log.info('Encountering pokemon for more details')
-        if args.encounter_blacklist:
-            log.info("Not encountering {}".format(args.encounter_blacklist))
+        log.info('Encountering pokemon enabled')
 
     config['LOCALE'] = args.locale
     config['CHINA'] = args.china
