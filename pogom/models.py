@@ -654,7 +654,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
 
                 # Scan for IVs and moves
                 encounter_result = None
-                if args.encounter and not p['pokemon_data']['pokemon_id'] in args.encounter_blacklist:
+                if args.encounter and (p['pokemon_data']['pokemon_id'] in args.encounter_list) != args.encounter_blacklist:
                     time.sleep(args.encounter_delay)
                     encounter_result = api.encounter(encounter_id=p['encounter_id'],
                                                      spawn_point_id=p['spawn_point_id'],
