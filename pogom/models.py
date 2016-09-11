@@ -629,6 +629,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
     pokemons = {}
     pokestops = {}
     gyms = {}
+    skipped = 0
 
     cells = map_dict['responses']['GET_MAP_OBJECTS']['map_cells']
     for cell in cells:
@@ -637,6 +638,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
 
                 # Don't parse pokemon we've already encountered. Avoids IVs getting nulled out on rescanning.
                 if Pokemon.get_encountered_pokemon(p['encounter_id']):
+                    skipped += 1
                     continue
 
                 # time_till_hidden_ms was overflowing causing a negative integer.
@@ -764,7 +766,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
         db_update_queue.put((Gym, gyms))
 
     log.info('Parsing found %d pokemons, %d pokestops, and %d gyms',
-             len(pokemons),
+             len(pokemons) + skipped,
              len(pokestops),
              len(gyms))
 
@@ -775,7 +777,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
     }}))
 
     return {
-        'count': len(pokemons) + len(pokestops) + len(gyms),
+        'count': len(pokemons) + skipped + len(pokestops) + len(gyms),
         'gyms': gyms,
     }
 
