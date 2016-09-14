@@ -663,8 +663,8 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
 
                 # Scan for IVs and moves
                 encounter_result = None
-                if (args.encounter and p['pokemon_data']['pokemon_id'] in args.encounter_whitelist or
-                        p['pokemon_data']['pokemon_id'] not in args.encounter_blacklist and not args.encounter_whitelist):
+                if (args.encounter and (p['pokemon_data']['pokemon_id'] in args.encounter_whitelist or
+                        p['pokemon_data']['pokemon_id'] not in args.encounter_blacklist and not args.encounter_whitelist)):
                     time.sleep(args.encounter_delay)
                     encounter_result = api.encounter(encounter_id=p['encounter_id'],
                                                      spawn_point_id=p['spawn_point_id'],
@@ -709,7 +709,9 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
 
                     if lure_info is not None and config['parse_pokemon']:
                         if Pokemon.get_encountered_pokemon(lure_info['encounter_id']):
+                            skipped =+ 1
                             continue
+
                         d_t = datetime.utcfromtimestamp(lure_info['lure_expires_timestamp_ms'] / 1000)
                         pokemons[lure_info['encounter_id']] = {
                             'encounter_id': b64encode(str(lure_info['encounter_id'])),
@@ -727,14 +729,15 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                             'move_1': None,
                             'move_2': None,
                         }
+
                         encounter_result = None
                         attack = None
                         defense = None
                         stamina = None
                         move_1 = None
                         move_2 = None
-                        if args.encounter and not lure_info['active_pokemon_id'] in args.encounter_blacklist:
-                            time.sleep(args.encounter_delay)
+                        if (args.encounter and (p['pokemon_data']['pokemon_id'] in args.encounter_whitelist or
+                                p['pokemon_data']['pokemon_id'] not in args.encounter_blacklist and not args.encounter_whitelist)):
                             encounter_result = api.disk_encounter(encounter_id=lure_info['encounter_id'],
                                                                   fort_id=f['id'],
                                                                   player_latitude=step_location[0],
