@@ -1503,7 +1503,7 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
           ${result.gym_points}/${nextLvlPrestige}
         </div>
         <div>
-          <b class="team-${result.team_id}-text">Level 7</b>
+          <b class="team-${result.team_id}-text">Level ${gymLevel}</b>
         </div>
         <div style="font-size: .7em;">
           Last Scanned: ${lastScannedDate.getFullYear()}-${pad(lastScannedDate.getMonth() + 1)}-${pad(lastScannedDate.getDate())} ${pad(lastScannedDate.getHours())}:${pad(lastScannedDate.getMinutes())}:${pad(lastScannedDate.getSeconds())}
