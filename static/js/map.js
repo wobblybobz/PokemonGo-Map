@@ -1373,15 +1373,15 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
             <td colspan="2">
               <div class="ivs">
                 <div class="iv">
-                  <div class="type">DEF</div>
-                  <div class="value">
-                    ${pokemon.iv_defense}
-                  </div>
-                </div>
-                <div class="iv">
                   <div class="type">ATK</div>
                   <div class="value">
                     ${pokemon.iv_attack}
+                  </div>
+                </div>
+                <div class="iv">
+                  <div class="type">DEF</div>
+                  <div class="value">
+                    ${pokemon.iv_defense}
                   </div>
                 </div>
                 <div class="iv">
