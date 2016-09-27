@@ -329,7 +329,7 @@ function pokemonLabel (name, rarity, types, disappearTime, id, latitude, longitu
         IV: ${iv.toFixed(1)}% (${atk}/${def}/${sta})
       </div>
       <div>
-        Moves: ${moves[move1]} / ${moves[move2]}
+        Moves: ${i8ln(moves[move1]['name'])} / ${i8ln(moves[move2]['name'])}
       </div>
       `
   }
