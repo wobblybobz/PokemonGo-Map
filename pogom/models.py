@@ -736,8 +736,8 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                         stamina = None
                         move_1 = None
                         move_2 = None
-                        if (args.encounter and (p['pokemon_data']['pokemon_id'] in args.encounter_whitelist or
-                                p['pokemon_data']['pokemon_id'] not in args.encounter_blacklist and not args.encounter_whitelist)):
+                        if (args.encounter and (lure_info['active_pokemon_id'] in args.encounter_whitelist or
+                                lure_info['active_pokemon_id'] not in args.encounter_blacklist and not args.encounter_whitelist)):
                             encounter_result = api.disk_encounter(encounter_id=lure_info['encounter_id'],
                                                                   fort_id=f['id'],
                                                                   player_latitude=step_location[0],
