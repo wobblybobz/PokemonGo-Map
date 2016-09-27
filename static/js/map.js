@@ -1399,7 +1399,7 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
                   </div>
                 </div>
                 <div class="iv">
-                  <div class="type">HP</div>
+                  <div class="type">STA</div>
                   <div class="value">
                     ${pokemon.iv_stamina}
                   </div>
