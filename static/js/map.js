@@ -1334,6 +1334,7 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
     var nextLvlPrestige = gymPrestige[gymLevel - 1] || 50000
     var prestigePercentage = (result.gym_points / nextLvlPrestige) * 100
     var lastScannedDate = new Date(result.last_scanned)
+    var freeSlots = gymLevel - result.pokemon.length
 
     var pokemonHtml = ''
     var headerHtml = `
@@ -1350,7 +1351,7 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
           ${result.gym_points}/${nextLvlPrestige}
         </div>
         <div>
-          <b class="team-${result.team_id}-text">Level ${gymLevel}</b>
+          <b class="team-${result.team_id}-text">Level ${gymLevel} - Free Slots: ${freeSlots}</b>
         </div>
         <div style="font-size: .7em;">
           Last Scanned: ${lastScannedDate.getFullYear()}-${pad(lastScannedDate.getMonth() + 1)}-${pad(lastScannedDate.getDate())} ${pad(lastScannedDate.getHours())}:${pad(lastScannedDate.getMinutes())}:${pad(lastScannedDate.getSeconds())}
