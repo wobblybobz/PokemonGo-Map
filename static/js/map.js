@@ -1377,13 +1377,13 @@ function showSpawnDetails (id) { // eslint-disable-line no-unused-vars
         var move2Name = pokemon.move_2_name ? pokemon.move_2_name : ''
         var spawnTime = new Date(pokemon.disappear_time - (15 * 60000))
 
-        var spawnTimeStr = `${pad(spawnTime.getDate())}/${pad(spawnTime.getMonth())}/${spawnTime.getFullYear()} ${pad(spawnTime.getHours())}:${pad(spawnTime.getMinutes())}:${pad(spawnTime.getSeconds())}`
         var perfectPercent = Math.round((attack + defense + stamina) * 100 / 45)
 
         spawnHistory.push(
           [
             '<img src="static/icons/' + pokemon.pokemon_id + '.png" />',
-            spawnTimeStr,
+            spawnTime.getTime(),
+            `${spawnTime.toLocaleDateString()} ${spawnTime.toLocaleTimeString()}`,
             perfectPercent,
             attack,
             defense,
@@ -1780,7 +1780,6 @@ $(function () {
     ]
   }).order([1, 'asc'])
 
-  $.fn.dataTable.moment('DD/MM/YYYY HH:mm:ss')
   $('#spawnHistory_table').DataTable({
     paging: false,
     searching: false,
@@ -1791,7 +1790,8 @@ $(function () {
     },
     'columns': [
       { 'orderable': false },
-      null,
+      { 'visible': false },
+      { 'orderData': 1 },
       null,
       null,
       null,
