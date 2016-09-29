@@ -518,6 +518,10 @@ function spawnpointLabel (item) {
         May appear as early as ${formatSpawnTime(item.time - 1800)}
       </div>`
   }
+  str += `
+      <div>
+        <a href="javascript:showSpawnDetails('${item.spawnpoint_id}')">View Previous Spawns</a>
+      </div>`
   return str
 }
 
@@ -1342,6 +1346,66 @@ function createUpdateWorker () {
   }
 }
 
+function showSpawnDetails (id) {
+  var sidebar = document.querySelector('#spawn-details')
+
+  sidebar.classList.add('visible')
+
+  var data = $.ajax({
+    url: 'spawn_data',
+    type: 'GET',
+    data: {
+      'id': id
+    },
+    dataType: 'json',
+    cache: false
+  })
+
+  data.done(function (result) {
+    var spawnHistoryTable = $('#spawnHistory_table').DataTable()
+
+    document.getElementById('spawn-ldg-label').innerHTML = ''
+    document.getElementById('spawn-hist-label').innerHTML = 'Spawn History'
+    if (result.pokemon.length) {
+      var spawnHistory = []
+
+      $.each(result.pokemon, function (i, pokemon) {
+        var attack = pokemon.individual_attack ? pokemon.individual_attack : 0
+        var defense = pokemon.individual_defense ? pokemon.individual_defense : 0
+        var stamina = pokemon.individual_stamina ? pokemon.individual_stamina : 0
+        var move1Name = pokemon.move_1_name ? pokemon.move_1_name : ''
+        var move2Name = pokemon.move_2_name ? pokemon.move_2_name : ''
+        var spawnTime = new Date(pokemon.disappear_time - (15 * 60000))
+
+        var spawnTimeStr = `${pad(spawnTime.getDate())}/${pad(spawnTime.getMonth())}/${spawnTime.getFullYear()} ${pad(spawnTime.getHours())}:${pad(spawnTime.getMinutes())}:${pad(spawnTime.getSeconds())}`
+        var perfectPercent = Math.round((attack + defense + stamina) * 100 / 45)
+
+        spawnHistory.push(
+          [
+            '<img src="static/icons/' + pokemon.pokemon_id + '.png" />',
+            spawnTimeStr,
+            perfectPercent,
+            attack,
+            defense,
+            stamina,
+            move1Name,
+            move2Name
+          ]
+        )
+
+        $('#spawnHistory_table').dataTable().show()
+        spawnHistoryTable
+          .clear()
+          .rows.add(spawnHistory)
+          .draw()
+      })
+    } else {
+      spawnHistoryTable
+        .clear()
+        .draw()
+    }
+  })
+}
 //
 // Page Ready Exection
 //
@@ -1715,4 +1779,25 @@ $(function () {
       null
     ]
   }).order([1, 'asc'])
+
+  $.fn.dataTable.moment('DD/MM/YYYY HH:mm:ss')
+  $('#spawnHistory_table').DataTable({
+    paging: false,
+    searching: false,
+    info: false,
+    errMode: 'throw',
+    'language': {
+      'emptyTable': ''
+    },
+    'columns': [
+      { 'orderable': false },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  }).order([1, 'desc'])
 })
