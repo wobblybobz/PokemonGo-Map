@@ -1346,7 +1346,7 @@ function createUpdateWorker () {
   }
 }
 
-function showSpawnDetails (id) {
+function showSpawnDetails (id) { // eslint-disable-line no-unused-vars
   var sidebar = document.querySelector('#spawn-details')
 
   sidebar.classList.add('visible')
