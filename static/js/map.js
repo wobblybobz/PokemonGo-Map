@@ -1363,8 +1363,10 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
   data.done(function (result) {
     var gymLevel = getGymLevel(result.gym_points)
     var nextLvlPrestige = gymPrestige[gymLevel - 1] || 50000
-    var prestigePercentage = ((nextLvlPrestige - result.gym_points) / nextLvlPrestige) * 100
+    var prestigePercentage = (result.gym_points / nextLvlPrestige) * 100
     var lastScannedDate = new Date(result.last_scanned)
+    var freeSlots = result.pokemon.length ? gymLevel - result.pokemon.length : 0
+    var freeSlotsStr = freeSlots ? ` - ${freeSlots} Free Slots` : ''
 
     var pokemonHtml = ''
     var headerHtml = `
@@ -1381,7 +1383,7 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
           ${result.gym_points}/${nextLvlPrestige}
         </div>
         <div>
-          <b class="team-${result.team_id}-text">Level ${gymLevel}</b>
+          <b class="team-${result.team_id}-text">Level ${gymLevel}${freeSlotsStr}</b>
         </div>
         <div style="font-size: .7em;">
           Last Scanned: ${lastScannedDate.getFullYear()}-${pad(lastScannedDate.getMonth() + 1)}-${pad(lastScannedDate.getDate())} ${pad(lastScannedDate.getHours())}:${pad(lastScannedDate.getMinutes())}:${pad(lastScannedDate.getSeconds())}
@@ -1417,19 +1419,19 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
             <td colspan="2">
               <div class="ivs">
                 <div class="iv">
-                  <div class="type">DEF</div>
-                  <div class="value">
-                    ${pokemon.iv_defense}
-                  </div>
-                </div>
-                <div class="iv">
                   <div class="type">ATK</div>
                   <div class="value">
                     ${pokemon.iv_attack}
                   </div>
                 </div>
                 <div class="iv">
-                  <div class="type">HP</div>
+                  <div class="type">DEF</div>
+                  <div class="value">
+                    ${pokemon.iv_defense}
+                  </div>
+                </div>
+                <div class="iv">
+                  <div class="type">STA</div>
                   <div class="value">
                     ${pokemon.iv_stamina}
                   </div>
@@ -1496,15 +1498,6 @@ function toggleGymPokemonDetails (e) { // eslint-disable-line no-unused-vars
   e.lastElementChild.firstElementChild.classList.toggle('fa-angle-double-up')
   e.lastElementChild.firstElementChild.classList.toggle('fa-angle-double-down')
   e.nextElementSibling.classList.toggle('visible')
-}
-
-function getGymLevel (points) {
-  var level = 1
-  while (points >= gymPrestige[level - 1]) {
-    level++
-  }
-
-  return level
 }
 
 //
