@@ -36,6 +36,7 @@ class Pogom(Flask):
         self.route("/status", methods=['GET'])(self.get_status)
         self.route("/status", methods=['POST'])(self.post_status)
         self.route("/gym_data", methods=['GET'])(self.get_gymdata)
+        self.route("/spawn_data", methods=['GET'])(self.get_spawndata)
 
     def set_search_control(self, control):
         self.search_control = control
@@ -257,6 +258,11 @@ class Pogom(Flask):
                                gmaps_key=config['GMAPS_KEY'],
                                valid_input=self.get_valid_stat_input()
                                )
+    def get_spawndata(self):
+        id = request.args.get('id')
+        spawn = Pokemon.get_spawnpoint_history(id)
+
+        return jsonify(spawn)
 
     def get_gymdata(self):
         gym_id = request.args.get('id')
