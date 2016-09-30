@@ -782,11 +782,11 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue, a
                                 'latitude': f['latitude'],
                                 'longitude': f['longitude'],
                                 'disappear_time': calendar.timegm(d_t.timetuple()),
-                                'individual_attack': pokemons[f['encounter_id']]['individual_attack'],
-                                'individual_defense': pokemons[f['encounter_id']]['individual_defense'],
-                                'individual_stamina': pokemons[f['encounter_id']]['individual_stamina'],
-                                'move_1': pokemons[f['encounter_id']]['move_1'],
-                                'move_2': pokemons[f['encounter_id']]['move_2']
+                                'individual_attack': pokemons[lure_info['encounter_id']]['individual_attack'],
+                                'individual_defense': pokemons[lure_info['encounter_id']]['individual_defense'],
+                                'individual_stamina': pokemons[lure_info['encounter_id']]['individual_stamina'],
+                                'move_1': pokemons[lure_info['encounter_id']]['move_1'],
+                                'move_2': pokemons[lure_info['encounter_id']]['move_2']
                             }))
 
                 else:
