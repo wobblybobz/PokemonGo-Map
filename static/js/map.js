@@ -1347,10 +1347,13 @@ function createUpdateWorker () {
 }
 
 function showSpawnDetails (id) { // eslint-disable-line no-unused-vars
+  $('#showstats-switch').prop('checked', Store.get('showStats'))
   var sidebar = document.querySelector('#spawn-details')
 
   sidebar.classList.add('visible')
-
+  if (!Store.get('showStats')) {
+    sidebar.style.width = '15em'
+  }
   var data = $.ajax({
     url: 'spawn_data',
     type: 'GET',
@@ -1752,6 +1755,19 @@ $(function () {
     Store.set('scanHere', this.checked)
   })
 
+  $('#showstats-switch').change(function () {
+    Store.set('showStats', this.checked)
+    var statTable = $('#spawnHistory_table').DataTable()
+    var sidebar = document.querySelector('#spawn-details')
+    statTable.column(3).visible(this.checked)
+    statTable.column(4).visible(this.checked)
+    statTable.column(5).visible(this.checked)
+    statTable.column(6).visible(this.checked)
+    statTable.column(7).visible(this.checked)
+    statTable.column(8).visible(this.checked)
+    sidebar.style.width = this.checked ? '' : '15em'
+  })
+
   if ($('#nav-accordion').length) {
     $('#nav-accordion').accordion({
       active: 0,
@@ -1779,6 +1795,7 @@ $(function () {
       null
     ]
   }).order([1, 'asc'])
+  var encounterStats = Store.get('showStats')
 
   $('#spawnHistory_table').DataTable({
     paging: false,
@@ -1789,15 +1806,15 @@ $(function () {
       'emptyTable': ''
     },
     'columns': [
-      { 'orderable': false },
+      { 'width': '30px', 'orderable': false },
       { 'visible': false },
       { 'orderData': 1 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
+      { 'visible': Store.get('showStats') },
+      { 'visible': Store.get('showStats') },
+      { 'visible': Store.get('showStats') },
+      { 'visible': Store.get('showStats') },
+      { 'visible': Store.get('showStats') },
+      { 'visible': Store.get('showStats') }
     ]
   }).order([1, 'desc'])
 })
