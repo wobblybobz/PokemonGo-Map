@@ -1795,7 +1795,6 @@ $(function () {
       null
     ]
   }).order([1, 'asc'])
-  var encounterStats = Store.get('showStats')
 
   $('#spawnHistory_table').DataTable({
     paging: false,
