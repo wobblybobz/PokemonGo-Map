@@ -110,6 +110,9 @@
   // Gym sidebar
   var $gymSidebar = document.querySelector('#gym-details')
 
+  // Spawnpoint History Sidebar
+  var $spawnpointSidebar = document.querySelector('#spawn-details')
+
   // Event: Prevent clicks/taps inside the nav from bubbling.
   addEventsListener($nav, 'click touchend', function (event) {
     event.stopPropagation()
@@ -125,6 +128,13 @@
   if ($gymSidebar) {
     // Event: Prevent clicks/taps inside the gym sidebar from bubbling.
     addEventsListener($gymSidebar, 'click touchend', function (event) {
+      event.stopPropagation()
+    })
+  }
+
+  if ($spawnpointSidebar) {
+    // Event: Prevent clicks/taps inside the spawnpoint sidebar from bubbling.
+    addEventsListener($spawnpointSidebar, 'click touchend', function (event) {
       event.stopPropagation()
     })
   }
@@ -146,6 +156,9 @@
     }
     if ($gymSidebar) {
       $gymSidebar.classList.remove('visible')
+    }
+    if ($spawnpointSidebar) {
+      $spawnpointSidebar.classList.remove('visible')
     }
   })
 
