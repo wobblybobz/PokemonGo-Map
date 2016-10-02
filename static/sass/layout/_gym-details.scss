@@ -319,6 +319,9 @@
               background-color: #f85888;
               // color: _get_text_color(#f85888);
           }
+          &.dark {
+              background-color: #705848;
+          }
         }
       }
 
