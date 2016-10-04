@@ -666,7 +666,7 @@ function setupGymMarker (item) {
 
   marker.addListener('click', function () {
     var gymSidebar = document.querySelector('#gym-details')
-    if(gymSidebar.getAttribute('data-id') == item['gym_id'] && gymSidebar.classList.contains('visible')) {
+    if (gymSidebar.getAttribute('data-id') === item['gym_id'] && gymSidebar.classList.contains('visible')) {
       gymSidebar.classList.remove('visible')
     } else {
       gymSidebar.setAttribute('data-id', item['gym_id'])
