@@ -445,8 +445,7 @@ function gymLabel (teamName, teamId, gymPoints, latitude, longitude, lastScanned
             Last Scanned: ${lastScannedStr}
           </div>
           <div>
-            <a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='View in Maps'>Get directions</a> |
-            <a href="javascript:showGymDetails('${gymId}')">View Details</a>
+            <a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='View in Maps'>Get directions</a>
           </div>
         </center>
       </div>`
@@ -665,7 +664,32 @@ function setupGymMarker (item) {
     disableAutoPan: true
   })
 
-  addListeners(marker)
+  marker.addListener('click', function () {
+    var gymSidebar = document.querySelector('#gym-details')
+    if(gymSidebar.getAttribute('data-id') == item['gym_id'] && gymSidebar.classList.contains('visible')) {
+      gymSidebar.classList.remove('visible')
+    } else {
+      gymSidebar.setAttribute('data-id', item['gym_id'])
+      showGymDetails(item['gym_id'])
+    }
+  })
+
+  google.maps.event.addListener(marker.infoWindow, 'closeclick', function () {
+    marker.persist = null
+  })
+
+  marker.addListener('mouseover', function () {
+    marker.infoWindow.open(map, marker)
+    clearSelection()
+    updateLabelDiffTime()
+  })
+
+  marker.addListener('mouseout', function () {
+    if (!marker.persist) {
+      marker.infoWindow.close()
+    }
+  })
+
   return marker
 }
 
@@ -1467,10 +1491,9 @@ function createUpdateWorker () {
 
 function showGymDetails (id) { // eslint-disable-line no-unused-vars
   var sidebar = document.querySelector('#gym-details')
+  var sidebarClose
 
   sidebar.classList.add('visible')
-
-  console.log(id)
 
   var data = $.ajax({
     url: 'gym_data',
@@ -1613,6 +1636,18 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
     }
 
     sidebar.innerHTML = `${headerHtml}${pokemonHtml}`
+
+    sidebarClose = document.createElement('a')
+    sidebarClose.href = '#'
+    sidebarClose.className = 'close'
+    sidebarClose.tabIndex = 0
+    sidebar.appendChild(sidebarClose)
+
+    sidebarClose.addEventListener('click', function (event) {
+      event.preventDefault()
+      event.stopPropagation()
+      sidebar.classList.remove('visible')
+    })
   })
 }
 

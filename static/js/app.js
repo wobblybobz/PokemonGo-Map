@@ -109,6 +109,7 @@
 
   // Gym sidebar
   var $gymSidebar = document.querySelector('#gym-details')
+  var $gymSidebarClose
 
   // Event: Prevent clicks/taps inside the nav from bubbling.
   addEventsListener($nav, 'click touchend', function (event) {
@@ -144,11 +145,7 @@
     if ($stats) {
       $stats.classList.remove('visible')
     }
-    if ($gymSidebar) {
-      $gymSidebar.classList.remove('visible')
-    }
   })
-
   // Toggle.
 
   // Event: Toggle nav on click.
@@ -183,6 +180,11 @@
     $statsClose.tabIndex = 0
     $stats.appendChild($statsClose)
   }
+  $gymSidebarClose = document.createElement('a')
+  $gymSidebarClose.href = '#'
+  $gymSidebarClose.className = 'close'
+  $gymSidebarClose.tabIndex = 0
+  $gymSidebar.appendChild($gymSidebarClose)
 
   // Event: Hide on ESC.
   window.addEventListener('keydown', function (event) {
@@ -190,6 +192,9 @@
       $nav.classList.remove('visible')
       if ($stats) {
         $stats.classList.remove('visible')
+      }
+      if ($gymSidebar) {
+        $gymSidebar.classList.remove('visible')
       }
     }
   })
@@ -207,6 +212,15 @@
       event.preventDefault()
       event.stopPropagation()
       $stats.classList.remove('visible')
+    })
+  }
+
+  if ($gymSidebarClose) {
+    // Event: Hide stats on click.
+    $gymSidebarClose.addEventListener('click', function (event) {
+      event.preventDefault()
+      event.stopPropagation()
+      $gymSidebar.classList.remove('visible')
     })
   }
 })()
