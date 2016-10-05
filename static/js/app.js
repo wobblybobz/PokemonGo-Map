@@ -180,6 +180,7 @@
     $statsClose.tabIndex = 0
     $stats.appendChild($statsClose)
   }
+
   $gymSidebarClose = document.createElement('a')
   $gymSidebarClose.href = '#'
   $gymSidebarClose.className = 'close'

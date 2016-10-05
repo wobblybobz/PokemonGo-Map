@@ -588,7 +588,7 @@ class Gym(BaseModel):
                   .dicts()
                   .get())
 
-        result['guard_pokemon_name'] = get_pokemon_name(result['guard_pokemon_id'])
+        result['guard_pokemon_name'] = get_pokemon_name(result['guard_pokemon_id']) if result['guard_pokemon_id'] else ''
         result['pokemon'] = []
 
         pokemon = (GymMember

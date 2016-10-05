@@ -13,6 +13,7 @@ var $selectLuredPokestopsOnly
 var $selectSearchIconMarker
 var $selectGymMarkerStyle
 var $selectLocationIconMarker
+var $switchGymSidebar
 
 var language = document.documentElement.lang === '' ? 'en' : document.documentElement.lang
 var idToPokemon = {}
@@ -309,6 +310,8 @@ function updateSearchStatus () {
 
 function initSidebar () {
   $('#gyms-switch').prop('checked', Store.get('showGyms'))
+  $('#gym-sidebar-switch').prop('checked', Store.get('useGymSidebar'))
+  $('#gym-sidebar-wrapper').toggle(Store.get('showGyms'))
   $('#pokemon-switch').prop('checked', Store.get('showPokemon'))
   $('#pokestops-switch').prop('checked', Store.get('showPokestops'))
   $('#lured-pokestops-only-switch').val(Store.get('showLuredPokestopsOnly'))
@@ -424,6 +427,12 @@ function gymLabel (teamName, teamId, gymPoints, latitude, longitude, lastScanned
   } else {
     lastScannedStr = 'Unknown'
   }
+  var directionsStr = ''
+  if (!Store.get('useGymSidebar')) {
+    directionsStr = `<div>
+        <a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='View in Maps'>Get directions</a>
+      </div>`
+  }
 
   var nameStr = (name ? `<div>${name}</div>` : '')
 
@@ -444,9 +453,7 @@ function gymLabel (teamName, teamId, gymPoints, latitude, longitude, lastScanned
           <div>
             Last Scanned: ${lastScannedStr}
           </div>
-          <div>
-            <a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='View in Maps'>Get directions</a>
-          </div>
+          ${directionsStr}
         </center>
       </div>`
   } else {
@@ -476,9 +483,7 @@ function gymLabel (teamName, teamId, gymPoints, latitude, longitude, lastScanned
           <div>
             Last Scanned: ${lastScannedStr}
           </div>
-          <div>
-            <a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='View in Maps'>Get directions</a>
-          </div>
+          ${directionsStr}
         </center>
       </div>`
   }
@@ -664,32 +669,35 @@ function setupGymMarker (item) {
     disableAutoPan: true
   })
 
-  marker.addListener('click', function () {
-    var gymSidebar = document.querySelector('#gym-details')
-    if (gymSidebar.getAttribute('data-id') === item['gym_id'] && gymSidebar.classList.contains('visible')) {
-      gymSidebar.classList.remove('visible')
-    } else {
-      gymSidebar.setAttribute('data-id', item['gym_id'])
-      showGymDetails(item['gym_id'])
-    }
-  })
+  if (Store.get('useGymSidebar')) {
+    marker.addListener('click', function () {
+      var gymSidebar = document.querySelector('#gym-details')
+      if (gymSidebar.getAttribute('data-id') === item['gym_id'] && gymSidebar.classList.contains('visible')) {
+        gymSidebar.classList.remove('visible')
+      } else {
+        gymSidebar.setAttribute('data-id', item['gym_id'])
+        showGymDetails(item['gym_id'])
+      }
+    })
 
-  google.maps.event.addListener(marker.infoWindow, 'closeclick', function () {
-    marker.persist = null
-  })
+    google.maps.event.addListener(marker.infoWindow, 'closeclick', function () {
+      marker.persist = null
+    })
 
-  marker.addListener('mouseover', function () {
-    marker.infoWindow.open(map, marker)
-    clearSelection()
-    updateLabelDiffTime()
-  })
+    marker.addListener('mouseover', function () {
+      marker.infoWindow.open(map, marker)
+      clearSelection()
+      updateLabelDiffTime()
+    })
 
-  marker.addListener('mouseout', function () {
-    if (!marker.persist) {
-      marker.infoWindow.close()
-    }
-  })
-
+    marker.addListener('mouseout', function () {
+      if (!marker.persist) {
+        marker.infoWindow.close()
+      }
+    })
+  } else {
+    addListeners(marker)
+  }
   return marker
 }
 
@@ -1512,7 +1520,18 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
     var lastScannedDate = new Date(result.last_scanned)
     var freeSlots = result.pokemon.length ? gymLevel - result.pokemon.length : 0
     var freeSlotsStr = freeSlots ? ` - ${freeSlots} Free Slots` : ''
+    var gymLevelStr = ''
 
+    if (result.team_id === 0) {
+      gymLevelStr = `
+        <center class="team-${result.team_id}-text">
+          <b class="team-${result.team_id}-text">Uncontested - 1 Free Slot</b>
+        </center>`
+    } else {
+      gymLevelStr = `<div>
+        <b class="team-${result.team_id}-text">Level ${gymLevel}${freeSlotsStr}</b>
+      </div>`
+    }
     var pokemonHtml = ''
     var headerHtml = `
       <center class="team-${result.team_id}-text">
@@ -1527,11 +1546,12 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
         <div>
           ${result.gym_points}/${nextLvlPrestige}
         </div>
-        <div>
-          <b class="team-${result.team_id}-text">Level ${gymLevel}${freeSlotsStr}</b>
-        </div>
+        ${gymLevelStr}
         <div style="font-size: .7em;">
           Last Scanned: ${lastScannedDate.getFullYear()}-${pad(lastScannedDate.getMonth() + 1)}-${pad(lastScannedDate.getDate())} ${pad(lastScannedDate.getHours())}:${pad(lastScannedDate.getMinutes())}:${pad(lastScannedDate.getSeconds())}
+        </div>
+        <div>
+          <a href='javascript:void(0);' onclick='javascript:openMapDirections(${result.latitude},${result.longitude});' title='View in Maps'>Get directions</a>
         </div>
       </center>
     `
@@ -1620,6 +1640,8 @@ function showGymDetails (id) { // eslint-disable-line no-unused-vars
       })
 
       pokemonHtml = `<table><tbody>${pokemonHtml}</tbody></table>`
+    } else if (result.team_id === 0) {
+      pokemonHtml = ''
     } else {
       pokemonHtml = `
         <center class="team-${result.team_id}-text">
@@ -1741,6 +1763,24 @@ $(function () {
   $selectLuredPokestopsOnly.on('change', function () {
     Store.set('showLuredPokestopsOnly', this.value)
     lastpokestops = false
+    updateMap()
+  })
+  $switchGymSidebar = $('#gym-sidebar-switch')
+
+  $switchGymSidebar.on('change', function () {
+    Store.set('useGymSidebar', this.checked)
+    lastgyms = false
+    $.each(['gyms'], function (d, dType) {
+      $.each(mapData[dType], function (key, value) {
+        // for any marker you're turning off, you'll want to wipe off the range
+        if (mapData[dType][key].marker.rangeCircle) {
+          mapData[dType][key].marker.rangeCircle.setMap(null)
+          delete mapData[dType][key].marker.rangeCircle
+        }
+        mapData[dType][key].marker.setMap(null)
+      })
+      mapData[dType] = {}
+    })
     updateMap()
   })
 
@@ -1935,7 +1975,6 @@ $(function () {
         } else if (storageKey === 'showSpawnpoints') {
           lastspawns = false
         }
-
         updateMap()
       } else {
         $.each(dataType, function (d, dType) {
@@ -1958,6 +1997,17 @@ $(function () {
 
   // Setup UI element interactions
   $('#gyms-switch').change(function () {
+    var options = {
+      'duration': 500
+    }
+    var wrapper = $('#gym-sidebar-wrapper')
+    if (this.checked) {
+      lastgyms = false
+      wrapper.show(options)
+    } else {
+      lastgyms = false
+      wrapper.hide(options)
+    }
     buildSwitchChangeListener(mapData, ['gyms'], 'showGyms').bind(this)()
   })
   $('#pokemon-switch').change(function () {
